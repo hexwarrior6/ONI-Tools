@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark"> <!-- 深色模式 -->
+  <meta name="description" content="缺氧金属火山模块计算器">
+  <meta name="keywords" content="缺氧, 金属, 火山, 模块, 计算器">
+  <title>缺氧金属火山模块计算器</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f1923;
+      color: #c3d8e8;
+      margin: 0;
+    }
+
+    /* 主容器 */
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #3498db;
+    }
+
+    /* 表格样式 */
+    .game-table {
+      border-collapse: collapse;
+      background: #1a2633;
+      border: 2px solid #2c3e50;
+      width: 100%;
+      margin: 20px auto;
+    }
+
+    .game-table th {
+      background: #15202b;
+      padding: 12px;
+      border: 2px solid #2c3e50;
+      text-align: left;
+      color: #3498db;
+    }
+
+    .game-table td {
+      padding: 10px;
+      border: 1px solid #2c3e50;
+    }
+
+    /* 标签样式 */
+    .param-label {
+      color: #7f8c8d;
+      width: 100px;
+    }
+
+    /* 输入框容器 */
+    .param-value {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* 输入框样式 */
+    .param-value input {
+      background: #2c3e50;
+      border: 1px solid #34495e;
+      color: #ecf0f1;
+      padding: 5px;
+      width: 80px;
+      text-align: center;
+      margin-right: 5px;
+    }
+
+    .unit {
+      color: #95a5a6;
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+
+    /* 按钮样式 */
+    button {
+      background: #3498db;
+      padding: 10px 25px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      margin: 15px 0;
+      border-radius: 3px;
+      width: 100%;
+    }
+
+    /* 结果框 */
+    #result {
+      background: #1e2b38;
+      padding: 15px;
+      margin-top: 20px;
+      border: 2px solid #2c3e50;
+    }
+
+    .formula {
+      color: #95a5a6;
+      font-size: 0.9em;
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .game-table td {
+        padding: 6px;
+      }
+
+      .param-label {
+        width: 80px;
+        font-size: 0.9em;
+      }
+
+      .param-value input {
+        width: 50px;
+        padding: 4px;
+        font-size: 0.9em;
+        margin-right: 3px;
+      }
+
+      .unit {
+        font-size: 0.85em;
+      }
+
+      button {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>缺氧金属火山模块计算器</h1>
+    <table class="game-table">
+      <thead>
+        <tr>
+          <th colspan="2">效果</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="param-label">熔融金属</td>
+          <td class="param-value">
+            <input type="number" id="a" placeholder="a" step="0.1">
+            <span class="unit">&nbsp 千克/秒，</span>
+            <input type="number" id="temp" value="9999" step="0.1" disabled>
+            <span class="unit">°C</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="param-label">喷发周期</td>
+          <td class="param-value">
+            <span class="unit">每 &nbsp</span> 
+            <input type="number" id="b" placeholder="b">
+            <span class="unit">&nbsp s 中喷发 &nbsp</span> 
+            <input type="number" id="c" placeholder="c">
+            <span class="unit"> s</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button onclick="calculate()">计算输送间隔</button>
+    <p class="formula">计算公式：<br>输送间隔 = 20 / ( (a * c) / (b - c) ) - 3</p>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function calculate() {
+      const a = parseFloat(document.getElementById('a').value);
+      const b = parseFloat(document.getElementById('b').value);
+      const c = parseFloat(document.getElementById('c').value);
+
+      try {
+        if ([a, b, c].some(v => isNaN(v) || v <= 0)) {
+          throw new Error("请输入有效正数");
+        }
+        if (c >= b) throw new Error("活跃总时长必须大于喷发周期");
+
+        const denominator = (a * c) / (b - c);
+        if (denominator === 0) throw new Error("无效参数组合");
+        const interval = 20 / denominator - 3;
+
+        document.getElementById('result').innerHTML = `
+              <strong>时间传感器设置：</strong><br>
+              <span style="color: #FF4136">- 红色信号：${interval.toFixed(1)} s</span><br>
+              <span style="color: #2ECC40">- 绿色信号：1 s</span>
+          `;
+      } catch (error) {
+        document.getElementById('result').innerHTML =
+          `<div style="color:#FF4136">错误：${error.message}</div>`;
+      }
+    }
+  </script>
+</body>
+
+</html>
